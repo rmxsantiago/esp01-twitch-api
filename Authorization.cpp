@@ -1,8 +1,8 @@
 #include <Authorization.h>
 
-String getAuthorizationRequest(
-    const char* clientId,
-    const char* clientSecret
+string getAuthorizationRequest(
+    string clientId,
+    string clientSecret
 ) {
     stringstream data;
     data << "client_id=" << clientId << flush;
@@ -19,5 +19,5 @@ String getAuthorizationRequest(
     header << endl;
     header << body << endl;
 
-    return String(header.str().c_str());
+    return header.str();
 }

@@ -6,8 +6,8 @@
 
 using namespace std;
 
-String getStreams(
-    String streamerName,
+string getStreams(
+    string streamerName,
     const char* clientId,
-    String accessToken
+    string accessToken
 );

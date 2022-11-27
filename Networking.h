@@ -12,5 +12,5 @@ int connect(
     const char* host
 );
 
-String processResponse(WiFiClientSecure &client);
+string processResponse(WiFiClientSecure &client);
 void waitForResponse(WiFiClientSecure &client);

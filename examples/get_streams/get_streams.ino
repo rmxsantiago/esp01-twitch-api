@@ -46,14 +46,14 @@ void loop() {
     return;
   }
 
-  String authRequest = getAuthorizationRequest(CLIENTID, CLIENTSECRET);
-  client.print(authRequest);
+  string authRequest = getAuthorizationRequest(string(CLIENTID), string(CLIENTSECRET));
+  client.print(authRequest.data());
   
   waitForResponse(client);
 
-  JSONVar json = JSON.parse(processResponse(client));
-  String accessToken = String((const char*) json["access_token"]);
-  Serial.println(accessToken);
+  JSONVar json = JSON.parse(processResponse(client).data());
+  string accessToken = string(json["access_token"]);
+  Serial.println(accessToken.data());
 
   connStatus = connect(client, TWITCH_API_HOST);
   if(connStatus == FAILED) {
@@ -61,15 +61,20 @@ void loop() {
     return;
   }
 
-  String streamerName = "julialabs";
-  String streamerRequest = getStreams(streamerName, CLIENTID, accessToken);
-  Serial.println(streamerName);
-  client.println(streamerRequest);
+  string streamerName = "LIRIK";
+  string streamerRequest = getStreams(streamerName, CLIENTID, accessToken);
+  Serial.println(streamerName.data());
+  client.println(streamerRequest.data());
 
   waitForResponse(client);
   
-  JSONVar jsonResponse = JSON.parse(processResponse(client));
+  JSONVar jsonResponse = JSON.parse(processResponse(client).data());
   JSONVar jsonStreammer = jsonResponse["data"][0];
+
+  if(jsonStreammer == null) {
+    Serial.println("Not live yet!");
+    return;
+  }
 
   Serial.print("id: ");
   Serial.println(jsonStreammer["id"]);

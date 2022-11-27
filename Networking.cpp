@@ -12,7 +12,7 @@ int connect(
     return CONNECTED;
 }
 
-String processResponse(WiFiClientSecure &client) {
+string processResponse(WiFiClientSecure &client) {
     stringstream response;
     bool isCapturingBody = false;
     int countingBrackets = 0;
@@ -38,7 +38,7 @@ String processResponse(WiFiClientSecure &client) {
         }        
     }
 
-    return String(response.str().c_str());
+    return response.str();
 }
 
 void waitForResponse(WiFiClientSecure &client) {
