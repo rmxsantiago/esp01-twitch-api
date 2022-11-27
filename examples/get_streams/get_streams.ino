@@ -29,15 +29,14 @@ void setup() {
 
   Serial.println("");
   Serial.println("WiFi connected");
-  Serial.println("IP address: ");
+  Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
 
   delay(500);
 }
 
 
-void loop() {
-  // Use WiFiClient class to create TCP connections
+void loop() {  
   WiFiClientSecure client;
   client.setInsecure();
   
@@ -49,21 +48,10 @@ void loop() {
 
   String authRequest = getAuthorizationRequest(CLIENTID, CLIENTSECRET);
   client.print(authRequest);
+  
+  waitForResponse(client);
 
-  //read back one line from server
-  Serial.println("receiving from remote server");
-  unsigned long timeout = millis();
-  while (client.available() == 0) {
-    if (millis() - timeout > 5000) {
-      Serial.println(">>> Client Timeout !");
-      client.stop();
-      delay(60000);
-      return;
-    }
-  }
-
-  JSONVar json = JSON.parse(processResponse(client));  
-
+  JSONVar json = JSON.parse(processResponse(client));
   String accessToken = String((const char*) json["access_token"]);
   Serial.println(accessToken);
 
@@ -73,30 +61,49 @@ void loop() {
     return;
   }
 
-  String streamerRequest = getStreams(String("julialabs"), CLIENTID, accessToken);  
+  String streamerName = "julialabs";
+  String streamerRequest = getStreams(streamerName, CLIENTID, accessToken);
+  Serial.println(streamerName);
   client.println(streamerRequest);
 
-  timeout = millis();
-  while (client.available() == 0) {
-    if (millis() - timeout > 10000) {
-      Serial.println(">>> Client Timeout !"); 
-      client.stop();
-      delay(60000);
-      return;
-    }
+  waitForResponse(client);
+  
+  JSONVar jsonResponse = JSON.parse(processResponse(client));
+  JSONVar jsonStreammer = jsonResponse["data"][0];
+
+  Serial.print("id: ");
+  Serial.println(jsonStreammer["id"]);
+  Serial.print("user_login: ");
+  Serial.println(jsonStreammer["user_login"]);
+  Serial.print("user_name: ");
+  Serial.println(jsonStreammer["user_name"]);
+  Serial.print("game_id: ");
+  Serial.println(jsonStreammer["game_id"]);
+  Serial.print("game_name: ");
+  Serial.println(jsonStreammer["game_name"]);
+  Serial.print("type: ");
+  Serial.println(jsonStreammer["type"]);
+  Serial.print("title: ");
+  Serial.println(jsonStreammer["title"]);
+  Serial.print("viewer_count: ");
+  Serial.println(jsonStreammer["viewer_count"]);
+  Serial.print("started_at: ");
+  Serial.println(jsonStreammer["started_at"]);
+  Serial.print("language: ");
+  Serial.println(jsonStreammer["language"]);
+  Serial.print("thumbnail_url: ");
+  Serial.println(jsonStreammer["thumbnail_url"]); 
+  Serial.println("List of tags:");
+  JSONVar listOfTags = jsonStreammer["tag_ids"];
+  for (size_t i = 0; i < listOfTags.length(); i++) {
+    Serial.print(String(i) + ": ");
+    Serial.println(listOfTags[i]);
   }
-
-  delay(1000);
-
-  String response = processResponse(client);
-
-  Serial.println("Recebendo stream data");
-  Serial.println(response);
-
+  Serial.print("is_mature: ");
+  Serial.println(jsonStreammer["is_mature"]);  
 
   Serial.println("closing connection");
   client.stop();
-
-  Serial.println("wait 5 sec...");
-  delay(5000);
+  Serial.println("wait 10 sec...");
+  delay(10000);
 }

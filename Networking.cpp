@@ -14,18 +14,46 @@ int connect(
 
 String processResponse(WiFiClientSecure &client) {
     stringstream response;
-    bool capturing = false;
-    
+    bool isCapturingBody = false;
+    int countingBrackets = 0;
     while (client.available()) {
-        char ch = static_cast<char>(client.read());
-        if(ch == '{' || capturing == true || ch == '}') {
-            capturing = true;
+        char ch = static_cast<char>(client.read());        
+
+        if(ch == '{' || ch == '[') {
+            countingBrackets++;
+            isCapturingBody = true;
+        }
+
+        if(isCapturingBody) {
             response << ch << flush;
-            if(ch == '}') {
+        }
+
+        if(ch == '}' || ch == ']') {
+            countingBrackets--;
+
+            if(countingBrackets == 0) {  
+                isCapturingBody = false;              
                 break;
             }
-        }
+        }        
     }
 
     return String(response.str().c_str());
+}
+
+void waitForResponse(WiFiClientSecure &client) {
+    const unsigned long TIMEOUT_LIMIT = 5000;
+    const unsigned long DELAY_TIMEOUT = 5000;
+    const unsigned long DELAY_RESPONSE_OK = 1000;
+    
+    unsigned long timeout = millis();
+    while (client.available() == 0) {
+        if (millis() - timeout > TIMEOUT_LIMIT) {
+            Serial.println(">>> Request timeout! <<<");
+            client.stop();
+            delay(DELAY_TIMEOUT);
+            return;
+        }    
+    }
+    delay(DELAY_RESPONSE_OK);
 }

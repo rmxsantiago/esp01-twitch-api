@@ -13,3 +13,4 @@ int connect(
 );
 
 String processResponse(WiFiClientSecure &client);
+void waitForResponse(WiFiClientSecure &client);
